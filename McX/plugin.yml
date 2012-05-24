@@ -1,0 +1,81 @@
+author: next
+database: false
+description: Forum connection software
+main: me.nexttonothing.next.mcx.McX
+name: McX
+startup: postworld
+url: http://www.nexttonothing.me/
+version: '2.3.0.2'
+softdepend: [Vault]
+commands:
+   mcx:
+      description: This is a demo command.
+permissions:
+    mcx.*:
+        default: op
+        description: Gives access to all commands
+        children:
+            mcx.maintainer.*: true
+            mcx.vip.*: true
+            mcx.user.*: true
+    mcx.maintainer.*:
+        default: op
+        description: Allows all maintaining commands
+        children:
+            mcx.maintainer.on: true
+            mcx.maintainer.off: true
+            mcx.maintainer.status: true
+            mcx.maintainer.update: true
+            mcx.maintainer.reload.*: true
+            mcx.maintainer.economyupdater: true
+    mcx.maintainer.reload.*:
+        default: op
+        description: Allows reload of configuration and locale files
+        children:
+            mcx.maintainer.reload.all: true
+            mcx.maintainer.reload.config: true
+            mcx.maintainer.reload.locale: true
+    mcx.vip.*:
+        default: op
+        description: Allows all vip commands
+        children:
+            mcx.vip.override: true
+    mcx.user.*:
+        default: true
+        description: Allows all user commands
+        children:
+            mcx.user.lookup: true
+            mcx.user.join: true
+    mcx.maintainer.on:
+        description: Allows changing the Plugin Status to on
+        default: op
+    mcx.maintainer.off:
+        description: Allows changing the Plugin Status to off
+        default: op
+    mcx.maintainer.status:
+        description: Displays Status
+        default: op
+    mcx.maintainer.economyupdater:
+        description: Enable or disable the EconomyUpdater
+        default: op
+    mcx.maintainer.update:
+        description: Player is informed about Updates
+        default: op
+    mcx.maintainer.reload.all:
+        description: Allows reload of configuration and locale files via command mcx reload all
+        default: op
+    mcx.maintainer.reload.config:
+        description: Allows reload of configuration file via command mcx reload config
+        default: op
+    mcx.maintainer.reload.locale:
+        description: Allows reload of locale file via command mcx reload locale
+        default: op
+    mcx.vip.override:
+        description: Player does not need a Forum Account.
+        default: op
+    mcx.user.lookup:
+        description: Display whether player has Forum Account or not 
+        default: true
+    mcx.user.join:
+        description: Can join Server, otherwise will get kicked!
+        default: true
