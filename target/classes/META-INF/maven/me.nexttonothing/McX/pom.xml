@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>me.nexttonothing</groupId>
+  <artifactId>McX</artifactId>
+  <version>2.3.0.2</version>
+  <name>McX</name>
+  <url>http://www.nexttonothing.me/</url>
+  <scm>
+  	<url>https://github.com/NextToNothing/McX</url>
+  	<connection>scm:git:git://github.com/NextToNothing/McX.git</connection>
+  	<developerConnection>scm:git:ssh://git@github.com/NextToNothing/McX.git</developerConnection>
+  </scm>
+  
+  <build>
+    <finalName>${project.name}</finalName>
+    <sourceDirectory>${basedir}/src/</sourceDirectory>
+  </build>
+  
+  <repositories>
+    <!-- Bukkit -->
+    <repository>
+      <id>bukkit-repo</id>
+      <url>http://repo.bukkit.org/content/groups/public/</url>
+    </repository>
+  </repositories>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.bukkit</groupId>
+      <artifactId>bukkit</artifactId>
+      <version>1.2.5-R2.0</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.milkbowl.vault</groupId>
+      <artifactId>vault</artifactId>
+      <version>1.2.12-SNAPSHOT</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>
