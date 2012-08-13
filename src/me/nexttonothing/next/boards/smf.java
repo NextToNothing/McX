@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import me.nexttonothing.next.configs.MainConfig;
+import me.nexttonothing.next.mcx.McX;
 import me.nexttonothing.next.software.Software;
 
 public class smf extends Software{
@@ -90,6 +91,69 @@ public class smf extends Software{
     
     public String getForumGroup() {
         return this.getForumGroup(false);
+    }
+    
+    @Override
+    public boolean payPosts() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            String url = "jdbc:mysql://" + config.getString("mysql.host") + ":"
+                    + config.getString("mysql.port") + "/"
+                    + config.getString("mysql.database");
+            Connection con = DriverManager.getConnection(url,
+                    config.getString("mysql.user"),
+                    config.getString("mysql.password"));
+            Statement stmt = con.createStatement();
+            int currtime = (int) (config.getInt("economy.lastCheck") * 1000);
+            String query = "SELECT `id_member` FROM "
+                    + config.getString("mysql.prefix")
+                    + "messages WHERE `approved` = '1"
+                    + "' AND `poster_time` >= '" + currtime
+                    + "'";
+            ResultSet rs = stmt.executeQuery(query);
+            int userId;
+            while(rs.next()) {
+                if(rs.getInt("id_member") != 0) {
+                    userId = rs.getInt("id_member");
+                    query = "SELECT `member_name` FROM "
+                            + config.getString("mysql.prefix")
+                            + "members WHERE `id_member` = '" + rs.getInt("uid")
+                            + "' LIMIT 1";
+                    rs = stmt.executeQuery(query);
+                    if(rs.next()) {
+                        if (config.getOption("general.authType").equalsIgnoreCase("username")) {
+                            McX.economy.depositPlayer(rs.getString("member_name").toLowerCase(), config.getInt("economy.moneyPerPost"));
+                        }
+                        if (config.getOption("general.authType").equalsIgnoreCase("field")) {
+                            query ="SELECT id_field,col_name FROM "
+                                    + config.getString("mysql.prefix")
+                                    + "custom_fields WHERE id_field"
+                                    + "='" +  config.getString("field.id")
+                                    + "' LIMIT 1";
+                            rs = stmt.executeQuery(query);
+                            if (rs.next()) {
+                                query = "SELECT `value` FROM "
+                                        + config.getString("mysql.prefix")
+                                        + "themes WHERE `variable` = "
+                                        + "'cust_" + rs.getString("col_name")
+                                        + "' AND `id_member` = '" + userId
+                                        + "' LIMIT 1";
+                                rs = stmt.executeQuery(query);
+                                if(rs.next()) {
+                                    McX.economy.depositPlayer(rs.getString("value").toLowerCase(), config.getInt("economy.moneyPerPost"));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (SQLException e) {
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
     
     protected boolean isRegisteredOld(boolean o) {

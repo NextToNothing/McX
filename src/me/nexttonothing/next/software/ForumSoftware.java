@@ -26,7 +26,7 @@ public class ForumSoftware {
                 return new vbulletin(playername,config);
             }
         }
-        System.out.println("ForumSoftware not Found!");
+        System.out.println("[McX] Forum Software Not Found!");
         return null;
     } 
 }

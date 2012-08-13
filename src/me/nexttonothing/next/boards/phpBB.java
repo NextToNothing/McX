@@ -8,6 +8,7 @@ import java.sql.Statement;
 
 import me.nexttonothing.next.configs.MainConfig;
 
+import me.nexttonothing.next.mcx.McX;
 import me.nexttonothing.next.software.Software;
 
 public class phpBB extends Software {
@@ -176,6 +177,69 @@ public class phpBB extends Software {
                     return (userType != 1);
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean payPosts() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            String url = "jdbc:mysql://" + config.getString("mysql.host") + ":"
+                    + config.getString("mysql.port") + "/"
+                    + config.getString("mysql.database");
+            Connection con = DriverManager.getConnection(url,
+                    config.getString("mysql.user"),
+                    config.getString("mysql.password"));
+            Statement stmt = con.createStatement();
+            int currtime = (int) (config.getInt("economy.lastCheck") * 1000);
+            String query = "SELECT `poster_id` FROM "
+                    + config.getString("mysql.prefix")
+                    + "posts WHERE `post_postcount` = '1"
+                    + "' AND `post_approved` = '1"
+                    + "' AND `post_time` >= '" + currtime
+                    + "'";
+            ResultSet rs = stmt.executeQuery(query);
+            int userId;
+            String fieldName;
+            while(rs.next()) {
+                if(rs.getInt("poster_id") != 0) {
+                    userId = rs.getInt("poster_id");
+                    query = "SELECT `username_clean` FROM "
+                            + config.getString("mysql.prefix")
+                            + "users WHERE `user_id` = '" + userId
+                            + "' LIMIT 1";
+                    rs = stmt.executeQuery(query);
+                    if(rs.next()) {
+                        if (config.getOption("general.authType").equalsIgnoreCase("username")) {
+                            McX.economy.depositPlayer(rs.getString("username_clean").toLowerCase(), config.getInt("economy.moneyPerPost"));
+                        }
+                        if (config.getOption("general.authType").equalsIgnoreCase("field")) {
+                            query = "SELECT field_name FROM "
+                                    + this.config.getString("mysql.prefix")
+                                    + "profile_fields WHERE field_id='" + config.getInt("field.id")
+                                    + "' LIMIT 1";
+                            rs = stmt.executeQuery(query);
+                            if(rs.next()) {
+                                fieldName = rs.getString("field_name");
+                                query = "SELECT `pf_" + rs.getString("field_name") + "` FROM "
+                                        + config.getString("mysql.prefix")
+                                        + "profile_fields_data WHERE `user_id` = '" + userId
+                                        + "' LIMIT 1";
+                                rs = stmt.executeQuery(query);
+                                if (rs.next()) {
+                                    McX.economy.depositPlayer(rs.getString(fieldName).toLowerCase(), config.getInt("economy.moneyPerPost"));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (SQLException e) {
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

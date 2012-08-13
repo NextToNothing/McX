@@ -39,6 +39,10 @@ public class Software {
         return this.getForumGroup(false);
     }
     
+    public boolean payPosts() {
+    	return false;
+    }
+    
     protected boolean isRegisteredOld(boolean o) {
         return false;
     }
