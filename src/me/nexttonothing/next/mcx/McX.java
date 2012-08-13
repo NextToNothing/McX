@@ -69,6 +69,7 @@ public class McX extends JavaPlugin {
         } catch (Exception e) {
             System.out.println(lang.get("locale.validate.mysql.testFail"));
             this.getPluginLoader().disablePlugin(this);
+            return;
         }
         if(getMainConfig().getOption("general.type").equalsIgnoreCase("greylist")){
             addGreyListeners();
@@ -117,7 +118,8 @@ public class McX extends JavaPlugin {
         for (Player p: grey) {
                p.kickPlayer(lang.get("locale.player.notification.kick"));
             }
-        EconomyUpdater.stop();
+        if (economy != null)
+        	EconomyUpdater.stop();
         System.out.println(lang.get("locale.misc.disabled")  + Version);
     }
     
