@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import me.nexttonothing.next.configs.MainConfig;
+import me.nexttonothing.next.mcx.McX;
 import me.nexttonothing.next.software.Software;
 
 public class vbulletin extends Software {
@@ -151,6 +152,59 @@ public class vbulletin extends Software {
                         return (userType != 8);
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+        
+        @Override
+        public boolean payPosts() {
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+                String url = "jdbc:mysql://" + config.getString("mysql.host") + ":"
+                        + config.getString("mysql.port") + "/"
+                        + config.getString("mysql.database");
+                Connection con = DriverManager.getConnection(url,
+                        config.getString("mysql.user"),
+                        config.getString("mysql.password"));
+                Statement stmt = con.createStatement();
+                int currtime = (int) (config.getInt("economy.lastCheck") * 1000);
+                String query = "SELECT `userid` FROM "
+                        + config.getString("mysql.prefix")
+                        + "post WHERE `visible` = '1"
+                        + "' AND `dateline` >= '" + currtime
+                        + "'";
+                ResultSet rs = stmt.executeQuery(query);
+                int userId;
+                while(rs.next()) {
+                    if(rs.getInt("userid") != 0) {
+                        userId = rs.getInt("userid");
+                        query = "SELECT `username` FROM "
+                                + config.getString("mysql.prefix")
+                                + "user WHERE `userid` = '" + userId
+                                + "' LIMIT 1";
+                        rs = stmt.executeQuery(query);
+                        if(rs.next()) {
+                            if (config.getOption("general.authType").equalsIgnoreCase("username")) {
+                                McX.economy.depositPlayer(rs.getString("username").toLowerCase(), config.getInt("economy.moneyPerPost"));
+                            }
+                            if (config.getOption("general.authType").equalsIgnoreCase("field")) {
+                                query = "SELECT field" + this.config.getString("field.id") + "' FROM "
+                                        + this.config.getString("mysql.prefix")
+                                        + "userfield WHERE userid = '"
+                                        + userId + "' LIMIT 1";
+                                rs = stmt.executeQuery(query);
+                                if(rs.next()) {
+                                    McX.economy.depositPlayer(rs.getString("field" + this.config.getString("field.id")).toLowerCase(), config.getInt("economy.moneyPerPost"));
+                                }
+                            }
+                        }
+                    }
+                }
+                return true;
+            } catch (SQLException e) {
+                
             } catch (Exception e) {
                 e.printStackTrace();
             }

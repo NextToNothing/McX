@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import me.nexttonothing.next.configs.MainConfig;
+import me.nexttonothing.next.mcx.McX;
 import me.nexttonothing.next.software.Software;
 
 public class xenforo extends Software {
@@ -78,9 +79,9 @@ public class xenforo extends Software {
                     return true;
                 }
             } catch (SQLException e) {
-                
+
             } catch (ClassNotFoundException e) {
-                
+            	
             }
             return false;
         }
@@ -152,6 +153,60 @@ public class xenforo extends Software {
                         return (rs.getInt("is_banned") != 1);
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+        
+        @Override
+        public boolean payPosts() {
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+                String url = "jdbc:mysql://" + config.getString("mysql.host") + ":"
+                        + config.getString("mysql.port") + "/"
+                        + config.getString("mysql.database");
+                Connection con = DriverManager.getConnection(url,
+                        config.getString("mysql.user"),
+                        config.getString("mysql.password"));
+                Statement stmt = con.createStatement();
+                int currtime = (int) (config.getInt("economy.lastCheck") * 1000);
+                String query = "SELECT `user_id` FROM "
+                        + config.getString("mysql.prefix")
+                        + "posts WHERE `message_state` = 'visible"
+                        + "' AND `post_date` >= '" + currtime
+                        + "'";
+                ResultSet rs = stmt.executeQuery(query);
+                int userId;
+                while(rs.next()) {
+                    if(rs.getInt("user_id") != 0) {
+                        userId = rs.getInt("user_id");
+                        if (config.getOption("general.authType").equalsIgnoreCase("username")) {
+                            query = "SELECT `username` FROM "
+                                    + config.getString("mysql.prefix")
+                                    + "user WHERE `user_id` = '" + userId
+                                    + "' LIMIT 1";
+                            rs = stmt.executeQuery(query);
+                            if(rs.next()) {
+                                McX.economy.depositPlayer(rs.getString("username").toLowerCase(), config.getInt("economy.moneyPerPost"));
+                            }
+                        }
+                        if (config.getOption("general.authType").equalsIgnoreCase("field")) {
+                            query = "SELECT `field_value` FROM "
+                                    + config.getString("mysql.prefix")
+                                    + "user_field_value WHERE `user_id` = '" + userId
+                                    + "' AND `field_id` = '" + config.getString("field.id")
+                                    + "' LIMIT 1";
+                            rs = stmt.executeQuery(query);
+                            if(rs.next()) {
+                            	McX.economy.depositPlayer(rs.getString("field_value").toLowerCase(), config.getInt("economy.moneyPerPost"));
+                            }
+                        }
+                    }
+                }
+                return true;
+            } catch (SQLException e) {
+                
             } catch (Exception e) {
                 e.printStackTrace();
             }
